@@ -1,0 +1,1 @@
+# ngx_http_avatars_gen_module
