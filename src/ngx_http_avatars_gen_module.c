@@ -120,9 +120,11 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     // 1 symbol
     if (*(r->uri.data + r->uri.len - 2) == '/') {
         initials[0] = *(r->uri.data + r->uri.len - 1);
-    } else {
+    } else if (*(r->uri.data + r->uri.len - 3) == '/') {
         initials[0] = *(r->uri.data + r->uri.len - 2);
         initials[1] = *(r->uri.data + r->uri.len - 1);
+    } else {
+        return NGX_HTTP_BAD_REQUEST;
     }
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Initials %s", initials);
 
@@ -134,10 +136,11 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     if (rc != NGX_OK) {
         return rc;
     }
-    r->headers_out.content_type_len = sizeof("text/html") - 1;
-    r->headers_out.content_type.data = (u_char *) "text/html";
+    r->headers_out.content_type_len = sizeof("image/png") - 1;
+    r->headers_out.content_type.data = (u_char *) "image/png";
     if (r->method == NGX_HTTP_HEAD) {
         r->headers_out.status = NGX_HTTP_OK;
+        // TODO
         r->headers_out.content_length_n = 0;
 
         return ngx_http_send_header(r);
