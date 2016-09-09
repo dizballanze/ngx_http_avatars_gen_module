@@ -1,14 +1,4 @@
-#include <cairo.h>
-#include <stdio.h>
-#include <math.h>
-
-
-typedef struct rgb rgb;
-struct rgb {
-    double red;
-    double green;
-    double blue;
-};
+#include "avatars_gen.h"
 
 
 cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int length) {
@@ -24,15 +14,15 @@ cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int
 }
 
 
-void generate_avatar(rgb *background_color, rgb *contour_color, rgb *font_color, char *text, char *font) {
+void generate_avatar(avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *text, char *font) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 100, 100);
     cairo_t *cr = cairo_create(surface);
     /* Draw circle and fill background */
     cairo_arc(cr, 50.0, 50.0, 50.0 - 1.25, 0, 2 * M_PI);
-    cairo_set_source_rgb(cr, background_color->red, background_color->green, background_color->blue);
+    cairo_set_source_avatars_gen_rgb(cr, background_color->red, background_color->green, background_color->blue);
     cairo_fill_preserve(cr);
     cairo_set_line_width(cr, 2.5);
-    cairo_set_source_rgb(cr, contour_color->red, contour_color->green, contour_color->blue);
+    cairo_set_source_avatars_gen_rgb(cr, contour_color->red, contour_color->green, contour_color->blue);
     cairo_stroke(cr);
     /* Draw text */
     cairo_text_extents_t extents;
@@ -42,7 +32,7 @@ void generate_avatar(rgb *background_color, rgb *contour_color, rgb *font_color,
     double x = 50.0 - (extents.width/2 + extents.x_bearing);
     double y = 50.0 - (extents.height/2 + extents.y_bearing);
     cairo_move_to(cr, x, y);
-    cairo_set_source_rgb(cr, font_color->red, font_color->green, font_color->blue);
+    cairo_set_source_avatars_gen_rgb(cr, font_color->red, font_color->green, font_color->blue);
     cairo_show_text(cr, text);
     /* Save and destroy */
     cairo_destroy (cr);
@@ -52,7 +42,7 @@ void generate_avatar(rgb *background_color, rgb *contour_color, rgb *font_color,
 
 
 int main() {
-    rgb bg_color, contour_color, font_color;
+    avatars_gen_rgb bg_color, contour_color, font_color;
     contour_color.red = 0.5;
     contour_color.green = 0.5;
     contour_color.blue = 0.5;

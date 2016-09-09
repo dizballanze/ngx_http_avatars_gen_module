@@ -1,20 +1,22 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
+#include <stdlib.h>
+#include "avatars_gen.h"
 
 
 /* Directives handlers declarations */
-/*static char *ngx_http_avatars_gen(ngx_conf_t *cf, void *post, void *data);*/
-/*static ngx_conf_post_handler_pt ngx_http_avatars_gen_p = ngx_http_avatars_gen;*/
-/*static char *ngx_http_avatars_gen_bg_color(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);*/
 static char *ngx_http_avatars_gen_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_avatars_gen_bg_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_avatars_gen_contour_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_avatars_gen_font_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 typedef struct {
-    ngx_str_t  bg_color;
-    ngx_str_t  contour_color;
-    ngx_str_t  font_color;
-    ngx_str_t  font_face;
+    avatars_gen_rgb bg_color;
+    avatars_gen_rgb contour_color;
+    avatars_gen_rgb font_color;
+    ngx_str_t font_face;
 } ngx_http_avatars_gen_loc_conf_t;
 
 
@@ -38,19 +40,19 @@ static ngx_command_t ngx_http_avatars_gen_commands[] = {
       NULL},
     { ngx_string("avatars_gen_bg_color"),
       NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_slot,
+      ngx_http_avatars_gen_bg_color_found_cb,
       NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_avatars_gen_loc_conf_t, bg_color),
+      0,
       NULL},
     { ngx_string("avatars_gen_contour_color"),
       NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_slot,
+      ngx_http_avatars_gen_contour_color_found_cb,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_avatars_gen_loc_conf_t, contour_color),
       NULL},
     { ngx_string("avatars_gen_font_color"),
       NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_slot,
+      ngx_http_avatars_gen_font_color_found_cb,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_avatars_gen_loc_conf_t, font_color),
       NULL},
@@ -109,12 +111,6 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     ngx_http_avatars_gen_loc_conf_t *loc_conf;
 
     loc_conf = ngx_http_get_module_loc_conf(r, ngx_http_avatars_gen_module);
-    if (loc_conf->bg_color.len)
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "bg_color %s", loc_conf->bg_color.data);
-    if (loc_conf->contour_color.len)
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "contour_color %s", loc_conf->contour_color.data);
-    if (loc_conf->font_color.len)
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "font_color %s", loc_conf->font_color.data);
     if (loc_conf->font_face.len)
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "font_face %s", loc_conf->font_face.data);
 
@@ -149,22 +145,66 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     return ngx_http_output_filter(r, &out);
 }
 
-/*
- * Function for the directive avatars_gen and sets up
- * http handler.
-static char *ngx_http_avatars_gen(ngx_conf_t *cf, void *post, void *data) {
-    ngx_conf_log_error(NGX_LOG_INFO, cf, 0, "avatars_gen post handler");
+
+static char *ngx_http_avatars_gen_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "avatars_gen found callback");
     ngx_http_core_loc_conf_t *clcf;
     clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
     clcf->handler = ngx_http_avatars_gen_handler;
     return NGX_CONF_OK;
 }
- */
 
-static char *ngx_http_avatars_gen_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
-    ngx_conf_log_error(NGX_LOG_INFO, cf, 0, "avatars_gen post handler");
-    ngx_http_core_loc_conf_t *clcf;
-    clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
-    clcf->handler = ngx_http_avatars_gen_handler;
+
+int is_valid_color(ngx_str_t *color) {
+    if (color->len != 6) {
+        return 0;
+    }
+    return 1;
+}
+
+/* Convert RRGGBB string to avatars_gen_rgb structure */
+void str_to_rgb(ngx_str_t *str, avatars_gen_rgb *color) {
+    long int number = strtol((char *)str->data, NULL, 16);
+    color->red = ((number >> 16) & 0xFF) / 255.0;
+    color->green = ((number >> 8) & 0xFF) / 255.0;
+    color->blue = (number & 0xFF) / 255.0;
+}
+
+
+static char *ngx_http_avatars_gen_bg_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "avatars_gen_bg_color found callback");
+    ngx_http_avatars_gen_loc_conf_t *loc_conf = conf;
+    ngx_str_t *value;
+    value = cf->args->elts;
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "avatars_gen_bg_color %s len %d", value[1].data, value[1].len);
+    if (!is_valid_color(&value[1]))
+        return NGX_CONF_ERROR;
+    str_to_rgb(&value[1], &loc_conf->bg_color);
+    return NGX_CONF_OK;
+}
+
+
+static char *ngx_http_avatars_gen_font_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "avatars_gen_font_color found callback");
+    ngx_http_avatars_gen_loc_conf_t *loc_conf = conf;
+    ngx_str_t *value;
+    value = cf->args->elts;
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "avatars_gen_font_color %s len %d", value[1].data, value[1].len);
+    if (!is_valid_color(&value[1]))
+        return NGX_CONF_ERROR;
+    str_to_rgb(&value[1], &loc_conf->font_color);
+    return NGX_CONF_OK;
+}
+
+
+static char *ngx_http_avatars_gen_contour_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "avatars_gen_contour_color found callback");
+    ngx_http_avatars_gen_loc_conf_t *loc_conf = conf;
+    ngx_str_t *value;
+    value = cf->args->elts;
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "avatars_gen_contour_color %s len %d", value[1].data, value[1].len);
+    if (!is_valid_color(&value[1]))
+        return NGX_CONF_ERROR;
+    str_to_rgb(&value[1], &loc_conf->contour_color);
     return NGX_CONF_OK;
 }
