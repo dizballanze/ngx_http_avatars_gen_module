@@ -109,10 +109,22 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     ngx_int_t    rc;
     ngx_chain_t  out;
     ngx_http_avatars_gen_loc_conf_t *loc_conf;
+    unsigned char initials[] = "\0\0\0";
 
     loc_conf = ngx_http_get_module_loc_conf(r, ngx_http_avatars_gen_module);
     if (loc_conf->font_face.len)
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "font_face %s", loc_conf->font_face.data);
+
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "URI %s", r->uri.data);
+    initials[2] = '\0';
+    // 1 symbol
+    if (*(r->uri.data + r->uri.len - 2) == '/') {
+        initials[0] = *(r->uri.data + r->uri.len - 1);
+    } else {
+        initials[0] = *(r->uri.data + r->uri.len - 2);
+        initials[1] = *(r->uri.data + r->uri.len - 1);
+    }
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Initials %s", initials);
 
     if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD))) {
         return NGX_HTTP_NOT_ALLOWED;
