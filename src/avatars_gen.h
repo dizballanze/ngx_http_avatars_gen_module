@@ -1,6 +1,10 @@
-#ifndef _HASH_H
-#define _HASH_H
+#ifndef _NGX_AVATARS_GEN
+#define _NGX_AVATARS_GEN
 
+#include <ngx_config.h>
+#include <ngx_core.h>
+#include <ngx_http.h>
+#include <stdlib.h>
 #include <cairo.h>
 #include <stdio.h>
 #include <math.h>
@@ -14,6 +18,15 @@ struct avatars_gen_rgb {
 };
 
 
-void generate_avatar(avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *text, char *font);
+typedef struct avatars_gen_closure avatars_gen_closure;
+struct avatars_gen_closure {
+    ngx_http_request_t *r;
+    ngx_chain_t *first_chain;
+    ngx_chain_t *curr_chain;
+    size_t total_length;
+};
+
+
+void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *font, char *text);
 
 #endif
