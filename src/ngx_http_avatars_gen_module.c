@@ -17,9 +17,8 @@ typedef struct {
 
 /* Allocate memory for configuration */
 static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
-    unsigned char *default_font_face;
     ngx_conf_log_error(NGX_LOG_INFO, cf, 0, "create loc conf");
-    ngx_http_avatars_gen_loc_conf_t  *conf;
+    ngx_http_avatars_gen_loc_conf_t *conf;
     conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_avatars_gen_loc_conf_t));
     if (conf == NULL) {
         return NULL;
@@ -34,15 +33,25 @@ static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
     conf->font_color.red = 1.0;
     conf->font_color.green = 1.0;
     conf->font_color.blue = 1.0;
-    default_font_face = ngx_palloc(cf->pool, 5);
-    if (default_font_face == NULL) {
-        return NULL;
-    }
-    ngx_memcpy(default_font_face, "sans", 4);
-    conf->font_face.len = 4;
-    conf->font_face.data = default_font_face;
     return conf;
 }
+
+/* Merge location configuration */
+static char *ngx_http_avatars_gen_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child) {
+    ngx_http_avatars_gen_loc_conf_t *conf = child;
+    unsigned char *default_font_face;
+    if (!conf->font_face.len) {
+        default_font_face = ngx_palloc(cf->pool, 5);
+        if (default_font_face == NULL) {
+            return NGX_CONF_ERROR;
+        }
+        ngx_memcpy(default_font_face, "sans", 4);
+        conf->font_face.len = 4;
+        conf->font_face.data = default_font_face;
+    }
+    return NGX_CONF_OK;
+}
+
 
 /* Module directives */
 static ngx_command_t ngx_http_avatars_gen_commands[] = {
@@ -89,7 +98,7 @@ static ngx_http_module_t ngx_http_avatars_gen_module_ctx = {
     NULL,
     NULL,
     ngx_http_avatars_gen_create_loc_conf,
-    NULL
+    ngx_http_avatars_gen_merge_loc_conf
 };
 
 
