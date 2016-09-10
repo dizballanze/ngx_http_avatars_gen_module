@@ -1,5 +1,62 @@
 # ngx_http_avatars_gen_module
 
+Nginx module to generate gmail-like avatars based on user initials.
+
+## Dependencies
+
+Module requires libcairo:
+
+```
+sudo apt-get install libcairo2 libcairo2-dev
+```
+
+
+## Installation
+
+To install module you should compile nginx with it:
+
+```
+cd nginx-1.11.3/
+./configure --add-module=/path/to/module/avatars_gen
+make && sudo make install
+```
+
+## Configuration
+
+Module could be enabled on location context:
+
+```nginx
+http {
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location /avatar {
+            avatars_gen;
+            avatars_gen_bg_color FFFFFF;
+            avatars_gen_contour_color 929292;
+            avatars_gen_font_color 6A6A6A;
+            avatars_gen_font_face sans;
+        }
+    }
+}
+```
+
+Directives:
+
+- `avatars_gen` - enables avatars generation on this location
+- `avatars_gen_bg_color` - background color of avatar
+- `avatars_gen_contour_color` - circle contour color
+- `avatars_gen_font_color` - font color
+- `avatars_gen_font_face` - css-like simplified font-face
+
+## Usage
+
+You can make request to `http://localhost/avatar/GH` and it will generate 100x100 png image on-the-go:
+
+![ava.png](sample.png)
+
+__Module currently supports only 1 and 2 symbols initials.__
 
 ## License
 
