@@ -33,9 +33,9 @@ http {
 
         location /avatar {
             avatars_gen;
-            avatars_gen_bg_color FFFFFF;
-            avatars_gen_contour_color 929292;
-            avatars_gen_font_color 6A6A6A;
+            avatars_gen_bg_color 4285F4;
+            avatars_gen_contour_color 333333;
+            avatars_gen_font_color FFFFFF;
             avatars_gen_font_face sans;
         }
     }
