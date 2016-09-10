@@ -70,6 +70,7 @@ __Module currently supports only 1 and 2 symbols initials.__
 - [ ]  enable/disable border
 - [ ]  square avatars
 - [ ]  different formats (jpg/svg)
+- [ ]  configurations merge
 
 
 ## License
