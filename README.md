@@ -60,11 +60,11 @@ __Module currently supports only 1 and 2 symbols initials.__
 
 ## TODO
 
+- [x]  fix HEAD method
 - [ ]  unicode initials
 - [ ]  avatars size configuration
 - [ ]  reach font settings
 - [ ]  default settings
-- [ ]  fix HEAD method
 - [ ]  colors configuration through GET parameters
 - [ ]  random colors mode
 - [ ]  enable/disable border

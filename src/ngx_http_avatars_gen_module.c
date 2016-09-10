@@ -131,13 +131,6 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     }
     r->headers_out.content_type_len = sizeof("image/png") - 1;
     r->headers_out.content_type.data = (u_char *) "image/png";
-    if (r->method == NGX_HTTP_HEAD) {
-        r->headers_out.status = NGX_HTTP_OK;
-        // TODO
-        r->headers_out.content_length_n = 0;
-
-        return ngx_http_send_header(r);
-    }
 
     draw_closure.first_chain = &out;
     draw_closure.curr_chain = NULL;
@@ -148,10 +141,9 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
 
     r->headers_out.status = NGX_HTTP_OK;
     r->headers_out.content_length_n = draw_closure.total_length;
-
     rc = ngx_http_send_header(r);
 
-    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only || (r->method == NGX_HTTP_HEAD)) {
         return rc;
     }
 
