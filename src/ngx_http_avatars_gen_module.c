@@ -24,12 +24,12 @@ static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
         return NULL;
     }
     /* Set default directives values */
-    conf->bg_color.red = 0.22;
-    conf->bg_color.green = 0.8;
-    conf->bg_color.blue = 0.8;
-    conf->contour_color.red = 0;
-    conf->contour_color.green = 0.12;
-    conf->contour_color.blue = 0.25;
+    conf->bg_color.red = 0.26;
+    conf->bg_color.green = 0.52;
+    conf->bg_color.blue = 0.96;
+    conf->contour_color.red = 0.2;
+    conf->contour_color.green = 0.2;
+    conf->contour_color.blue = 0.2;
     conf->font_color.red = 1.0;
     conf->font_color.green = 1.0;
     conf->font_color.blue = 1.0;
