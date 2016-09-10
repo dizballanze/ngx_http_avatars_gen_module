@@ -1,12 +1,14 @@
 #include "avatars_gen.h"
 
 
+/* Create buffer chains filled with avatar data */
 cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int length) {
     avatars_gen_closure *custom_closure = closure;
     ngx_chain_t *new_curr_chain;
     ngx_buf_t *b;
     unsigned char *buffer;
     int is_first = (custom_closure->curr_chain == NULL);
+    /* Get chain item */
     if (is_first) {
         new_curr_chain = custom_closure->first_chain;
     } else {
@@ -15,35 +17,37 @@ cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int
             return CAIRO_STATUS_WRITE_ERROR;
         }
     }
+    /* Allocate buffer */
     buffer = ngx_palloc(custom_closure->r->pool, length);
     if (buffer == NULL) {
         return CAIRO_STATUS_WRITE_ERROR;
     }
     ngx_memcpy(buffer, data, length);
-
+    /* Allocate buffer container */
     b = ngx_pcalloc(custom_closure->r->pool, sizeof(ngx_buf_t));
     if (b == NULL) {
         return CAIRO_STATUS_WRITE_ERROR;
     }
-
     b->pos = buffer;
     b->last = buffer + length;
     b->memory = 1;
     b->last_buf = 1;
-
+    /* Set buffer to chain item */
     new_curr_chain->buf = b;
     new_curr_chain->next = NULL;
-
+    /* Process chain links */
     if (!is_first) {
         custom_closure->curr_chain->next = new_curr_chain;
         custom_closure->curr_chain->buf->last_buf = 0;
     }
     custom_closure->curr_chain = new_curr_chain;
-
+    /* Accumulate total image size */
     custom_closure->total_length += length;
     return CAIRO_STATUS_SUCCESS;
 }
 
+
+/* Draw avatar by provided options */
 void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *font, char *text) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 100, 100);
     cairo_t *cr = cairo_create(surface);

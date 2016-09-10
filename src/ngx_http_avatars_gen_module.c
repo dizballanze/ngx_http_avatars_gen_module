@@ -7,7 +7,7 @@ static char *ngx_http_avatars_gen_bg_color_found_cb(ngx_conf_t *cf, ngx_command_
 static char *ngx_http_avatars_gen_contour_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static char *ngx_http_avatars_gen_font_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
-
+/* Configuration structure */
 typedef struct {
     avatars_gen_rgb bg_color;
     avatars_gen_rgb contour_color;
@@ -15,7 +15,7 @@ typedef struct {
     ngx_str_t font_face;
 } ngx_http_avatars_gen_loc_conf_t;
 
-
+/* Allocate memory for configuration */
 static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
     ngx_conf_log_error(NGX_LOG_INFO, cf, 0, "create loc conf");
     ngx_http_avatars_gen_loc_conf_t  *conf;
@@ -26,7 +26,7 @@ static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
     return conf;
 }
 
-
+/* Module directives */
 static ngx_command_t ngx_http_avatars_gen_commands[] = {
     { ngx_string("avatars_gen"),
       NGX_HTTP_LOC_CONF|NGX_CONF_NOARGS,
@@ -64,36 +64,32 @@ static ngx_command_t ngx_http_avatars_gen_commands[] = {
 
 
 static ngx_http_module_t ngx_http_avatars_gen_module_ctx = {
-    NULL,                          /* preconfiguration */
-    NULL,                          /* postconfiguration */
-
-    NULL,                          /* create main configuration */
-    NULL,                          /* init main configuration */
-
-    NULL,                          /* create server configuration */
-    NULL,                          /* merge server configuration */
-
-    ngx_http_avatars_gen_create_loc_conf, /* create location configuration */
-    NULL                           /* merge location configuration */
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    ngx_http_avatars_gen_create_loc_conf,
+    NULL
 };
 
 
 /*
  * The module which binds the context and commands
- *
  */
 ngx_module_t ngx_http_avatars_gen_module = {
     NGX_MODULE_V1,
-    &ngx_http_avatars_gen_module_ctx,    /* module context */
-    ngx_http_avatars_gen_commands,       /* module directives */
-    NGX_HTTP_MODULE,               /* module type */
-    NULL,                          /* init master */
-    NULL,                          /* init module */
-    NULL,                          /* init process */
-    NULL,                          /* init thread */
-    NULL,                          /* exit thread */
-    NULL,                          /* exit process */
-    NULL,                          /* exit master */
+    &ngx_http_avatars_gen_module_ctx,
+    ngx_http_avatars_gen_commands,
+    NGX_HTTP_MODULE,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NGX_MODULE_V1_PADDING
 };
 
@@ -155,9 +151,9 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
 
     rc = ngx_http_send_header(r);
 
-    /*if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {*/
-        /*return rc;*/
-    /*}*/
+    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+        return rc;
+    }
 
     return ngx_http_output_filter(r, &out);
 }
@@ -188,6 +184,7 @@ void str_to_rgb(ngx_str_t *str, avatars_gen_rgb *color) {
 }
 
 
+/* Colors directives parsing callbacks */
 static char *ngx_http_avatars_gen_bg_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
     ngx_conf_log_error(NGX_LOG_DEBUG, cf, 0, "avatars_gen_bg_color found callback");
     ngx_http_avatars_gen_loc_conf_t *loc_conf = conf;
