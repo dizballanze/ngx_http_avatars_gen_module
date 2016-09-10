@@ -62,7 +62,7 @@ __Module currently supports only 1 and 2 symbols initials.__
 
 - [x]  fix HEAD method
 - [x]  default settings
-- [ ]  unicode initials
+- [x]  unicode initials
 - [ ]  avatars size configuration
 - [ ]  enable/disable border
 - [ ]  rich font settings
