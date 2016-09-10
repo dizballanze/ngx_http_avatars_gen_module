@@ -54,7 +54,7 @@ Directives:
 
 You can make request to `http://localhost/avatar/GH` and it will generate 100x100 png image on-the-go:
 
-![ava.png](sample.png)
+![ava.png](ava.png)
 
 __Module currently supports only 1 and 2 symbols initials.__
 
