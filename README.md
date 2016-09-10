@@ -61,14 +61,14 @@ __Module currently supports only 1 and 2 symbols initials.__
 ## TODO
 
 - [x]  fix HEAD method
+- [x]  default settings
 - [ ]  unicode initials
 - [ ]  avatars size configuration
+- [ ]  enable/disable border
 - [ ]  reach font settings
-- [ ]  default settings
+- [ ]  square avatars
 - [ ]  colors configuration through GET parameters
 - [ ]  random colors mode
-- [ ]  enable/disable border
-- [ ]  square avatars
 - [ ]  different formats (jpg/svg)
 - [ ]  configurations merge
 

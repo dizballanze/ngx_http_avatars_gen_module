@@ -17,12 +17,30 @@ typedef struct {
 
 /* Allocate memory for configuration */
 static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
+    unsigned char *default_font_face;
     ngx_conf_log_error(NGX_LOG_INFO, cf, 0, "create loc conf");
     ngx_http_avatars_gen_loc_conf_t  *conf;
     conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_avatars_gen_loc_conf_t));
     if (conf == NULL) {
         return NULL;
     }
+    /* Set default directives values */
+    conf->bg_color.red = 0.22;
+    conf->bg_color.green = 0.8;
+    conf->bg_color.blue = 0.8;
+    conf->contour_color.red = 0;
+    conf->contour_color.green = 0.12;
+    conf->contour_color.blue = 0.25;
+    conf->font_color.red = 1.0;
+    conf->font_color.green = 1.0;
+    conf->font_color.blue = 1.0;
+    default_font_face = ngx_palloc(cf->pool, 5);
+    if (default_font_face == NULL) {
+        return NULL;
+    }
+    ngx_memcpy(default_font_face, "sans", 4);
+    conf->font_face.len = 4;
+    conf->font_face.data = default_font_face;
     return conf;
 }
 
