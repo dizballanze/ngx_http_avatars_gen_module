@@ -1,4 +1,5 @@
 #include "avatars_gen.h"
+#define INITIALS_MAX_SIZE 12
 
 
 /* Directives handlers declarations */
@@ -120,6 +121,36 @@ ngx_module_t ngx_http_avatars_gen_module = {
     NGX_MODULE_V1_PADDING
 };
 
+/* Fetch initials from URI and return result status */
+int get_initials_from_uri(ngx_str_t *uri, unsigned char *initials) {
+    unsigned char *curr_character = (uri->data + uri->len);
+    unsigned int characters_copied = 0;
+    while ((*curr_character != '/') && (characters_copied != INITIALS_MAX_SIZE) && (curr_character != uri->data)) {
+        initials[characters_copied] = *curr_character;
+        characters_copied++;
+        curr_character--;
+    }
+    if (*curr_character != '/') {
+        return 0;
+    }
+    /* Revert bytes */
+    unsigned char tmp;
+    unsigned int i;
+    for (i = 0; i < (characters_copied / 2); i++) {
+        tmp = initials[i];
+        initials[i] = initials[characters_copied - i - 1];
+        initials[characters_copied - i - 1] = tmp;
+    }
+    initials[characters_copied] = '\0';
+    /* Validate length */
+    size_t utf8_count = ngx_utf8_length(initials, characters_copied - 1);
+    if ((utf8_count > 2) || (utf8_count < 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+
 /*
  * Main handler function of the module.
  */
@@ -129,24 +160,19 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     ngx_chain_t out;
     ngx_http_avatars_gen_loc_conf_t *loc_conf;
     avatars_gen_closure draw_closure;
-    unsigned char initials[] = "\0\0\0";
+    unsigned char initials[INITIALS_MAX_SIZE + 1] = "";
 
     loc_conf = ngx_http_get_module_loc_conf(r, ngx_http_avatars_gen_module);
     if (loc_conf->font_face.len)
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "font_face %s", loc_conf->font_face.data);
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "URI %s", r->uri.data);
-    initials[2] = '\0';
     // 1 symbol
-    if (*(r->uri.data + r->uri.len - 2) == '/') {
-        initials[0] = *(r->uri.data + r->uri.len - 1);
-    } else if (*(r->uri.data + r->uri.len - 3) == '/') {
-        initials[0] = *(r->uri.data + r->uri.len - 2);
-        initials[1] = *(r->uri.data + r->uri.len - 1);
+    if (get_initials_from_uri(&r->uri, initials)) {
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "INITIALS %s", initials);
     } else {
         return NGX_HTTP_BAD_REQUEST;
     }
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Initials %s", initials);
 
     if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD))) {
         return NGX_HTTP_NOT_ALLOWED;
