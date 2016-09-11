@@ -48,17 +48,23 @@ cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int
 
 
 /* Draw avatar by provided options */
-void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *font, unsigned int font_size, unsigned int avatar_size, char *text) {
+void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *font, unsigned int font_size, unsigned int avatar_size, int show_contour, char *text) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, avatar_size, avatar_size);
     cairo_t *cr = cairo_create(surface);
     /* Draw circle and fill background */
     double radius = avatar_size / 2.0;
-    cairo_arc(cr, radius, radius, radius - 1.25, 0, 2 * M_PI);
+    double circle_radius = avatar_size / 2.0;
+    if (show_contour) {
+        circle_radius -= 1.25;
+    }
+    cairo_arc(cr, radius, radius, circle_radius, 0, 2 * M_PI);
     cairo_set_source_rgb(cr, background_color->red, background_color->green, background_color->blue);
     cairo_fill_preserve(cr);
-    cairo_set_line_width(cr, 2.5);
-    cairo_set_source_rgb(cr, contour_color->red, contour_color->green, contour_color->blue);
-    cairo_stroke(cr);
+    if (show_contour) {
+        cairo_set_line_width(cr, 2.5);
+        cairo_set_source_rgb(cr, contour_color->red, contour_color->green, contour_color->blue);
+        cairo_stroke(cr);
+    }
     /* Draw text */
     cairo_text_extents_t extents;
     cairo_select_font_face(cr, font, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
