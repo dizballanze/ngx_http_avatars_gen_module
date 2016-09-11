@@ -15,6 +15,7 @@ typedef struct {
     avatars_gen_rgb font_color;
     ngx_str_t font_face;
     ngx_uint_t avatar_size; // in pixels
+    ngx_uint_t font_size; // in pixels
 } ngx_http_avatars_gen_loc_conf_t;
 
 /* Allocate memory for configuration */
@@ -36,6 +37,7 @@ static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
     conf->font_color.green = 1.0;
     conf->font_color.blue = 1.0;
     conf->avatar_size = NGX_CONF_UNSET_UINT;
+    conf->font_size = NGX_CONF_UNSET_UINT;
     return conf;
 }
 
@@ -54,6 +56,9 @@ static char *ngx_http_avatars_gen_merge_loc_conf(ngx_conf_t *cf, void *parent, v
     }
     if (conf->avatar_size == NGX_CONF_UNSET_UINT) {
         conf->avatar_size = 100;
+    }
+    if (conf->font_size == NGX_CONF_UNSET_UINT) {
+        conf->font_size = conf->avatar_size / 2;
     }
     return NGX_CONF_OK;
 }
@@ -90,6 +95,12 @@ static ngx_command_t ngx_http_avatars_gen_commands[] = {
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_avatars_gen_loc_conf_t, font_face),
+      NULL},
+    { ngx_string("avatars_gen_font_size"),
+      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_num_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_avatars_gen_loc_conf_t, font_size),
       NULL},
     { ngx_string("avatars_gen_size"),
       NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
@@ -200,7 +211,7 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     draw_closure.curr_chain = NULL;
     draw_closure.total_length = 0;
     draw_closure.r = r;
-    generate_avatar(&draw_closure, &loc_conf->bg_color, &loc_conf->contour_color, &loc_conf->font_color, (char *)loc_conf->font_face.data, loc_conf->avatar_size, (char *)initials);
+    generate_avatar(&draw_closure, &loc_conf->bg_color, &loc_conf->contour_color, &loc_conf->font_color, (char *)loc_conf->font_face.data, loc_conf->font_size, loc_conf->avatar_size, (char *)initials);
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "TOTAL LENGTH %zu", draw_closure.total_length);
 
     r->headers_out.status = NGX_HTTP_OK;
