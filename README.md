@@ -67,7 +67,7 @@ __Module currently supports only 1 and 2 symbols initials.__
 - [x]  default settings
 - [x]  unicode initials
 - [x]  avatars size configuration
-- [ ]  enable/disable border
+- [x]  enable/disable border
 - [ ]  rich font settings
 - [ ]  square avatars
 - [ ]  colors configuration through GET parameters
