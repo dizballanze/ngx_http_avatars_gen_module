@@ -45,10 +45,11 @@ http {
 Directives:
 
 - `avatars_gen` - enables avatars generation on this location
-- `avatars_gen_bg_color` - background color of avatar
-- `avatars_gen_contour_color` - circle contour color
-- `avatars_gen_font_color` - font color
-- `avatars_gen_font_face` - css-like simplified font-face
+- `avatars_gen_bg_color` (default: `4285f5`) - background color of avatar
+- `avatars_gen_contour_color` (default: `333333`) - circle contour color
+- `avatars_gen_font_color` (default: `FFFFFF`) - font color
+- `avatars_gen_font_face` (default: `sans`)  - css-like simplified font-face
+- `avatars_gen_size` (default: `100`) - avatar size in pixels
 
 ## Usage
 
