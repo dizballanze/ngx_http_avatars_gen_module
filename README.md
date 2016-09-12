@@ -48,10 +48,12 @@ Directives:
 - `avatars_gen_bg_color` (default: `4285f5`) - background color of avatar
 - `avatars_gen_contour_color` (default: `333333`) - circle contour color
 - `avatars_gen_font_color` (default: `FFFFFF`) - font color
-- `avatars_gen_font_face` (default: `sans`)  - css-like simplified font-face
+- `avatars_gen_font_face` (default: `sans`) - font-face name
 - `avatars_gen_font_size` (default: `avatars_gen_size / 2`)  - font size in pixels
 - `avatars_gen_size` (default: `100`) - avatar size in pixels
 - `avatars_gen_show_contour` (default: `on`) - show/hide contour
+- `avatars_gen_font_italic` (default: `off`) - italic font on/off
+- `avatars_gen_font_bold` (default: `off`) - bold font on/off
 
 ## Usage
 
