@@ -54,6 +54,7 @@ Directives:
 - `avatars_gen_show_contour` (default: `on`) - show/hide contour
 - `avatars_gen_font_italic` (default: `off`) - italic font on/off
 - `avatars_gen_font_bold` (default: `off`) - bold font on/off
+- `avatars_gen_square` (default: `off`) - square avatars on/off
 
 ## Usage
 
@@ -71,7 +72,7 @@ __Module currently supports only 1 and 2 symbols initials.__
 - [x]  avatars size configuration
 - [x]  enable/disable border
 - [x]  rich font settings
-- [ ]  square avatars
+- [x]  square avatars
 - [ ]  colors configuration through GET parameters
 - [ ]  random colors mode
 - [ ]  different formats (jpg/svg)
