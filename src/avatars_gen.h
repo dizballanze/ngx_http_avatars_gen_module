@@ -29,6 +29,6 @@ struct avatars_gen_closure {
 
 void generate_avatar(
     avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color,
-    avatars_gen_rgb *font_color, char *font, unsigned int font_size, unsigned int avatar_size, int show_contour, char *text);
+    avatars_gen_rgb *font_color, char *font, unsigned int font_size, int font_italic, int font_bold, unsigned int avatar_size, int show_contour, char *text);
 
 #endif

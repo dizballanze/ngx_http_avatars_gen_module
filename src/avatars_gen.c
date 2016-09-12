@@ -48,7 +48,7 @@ cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int
 
 
 /* Draw avatar by provided options */
-void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *font, unsigned int font_size, unsigned int avatar_size, int show_contour, char *text) {
+void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *font, unsigned int font_size, int font_italic, int font_bold, unsigned int avatar_size, int show_contour, char *text) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, avatar_size, avatar_size);
     cairo_t *cr = cairo_create(surface);
     /* Draw circle and fill background */
@@ -67,7 +67,15 @@ void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_c
     }
     /* Draw text */
     cairo_text_extents_t extents;
-    cairo_select_font_face(cr, font, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    int font_slant = CAIRO_FONT_SLANT_NORMAL;
+    int font_weight = CAIRO_FONT_WEIGHT_NORMAL;
+    if (font_italic) {
+        font_slant = CAIRO_FONT_SLANT_ITALIC;
+    }
+    if (font_bold) {
+        font_weight = CAIRO_FONT_WEIGHT_BOLD;
+    }
+    cairo_select_font_face(cr, font, font_slant, font_weight);
     cairo_set_font_size(cr, font_size);
     cairo_text_extents(cr, text, &extents);
     double x = radius - (extents.width/2 + extents.x_bearing);
