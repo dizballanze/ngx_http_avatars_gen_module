@@ -19,6 +19,7 @@ typedef struct {
     ngx_flag_t font_italic;
     ngx_flag_t font_bold;
     ngx_flag_t show_contour;
+    ngx_flag_t square;
 } ngx_http_avatars_gen_loc_conf_t;
 
 /* Allocate memory for configuration */
@@ -44,6 +45,7 @@ static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
     conf->show_contour = NGX_CONF_UNSET;
     conf->font_italic = NGX_CONF_UNSET;
     conf->font_bold = NGX_CONF_UNSET;
+    conf->square = NGX_CONF_UNSET;
     return conf;
 }
 
@@ -74,6 +76,9 @@ static char *ngx_http_avatars_gen_merge_loc_conf(ngx_conf_t *cf, void *parent, v
     }
     if (conf->font_bold == NGX_CONF_UNSET) {
         conf->font_bold = 0;
+    }
+    if (conf->square == NGX_CONF_UNSET) {
+        conf->square = 0;
     }
     return NGX_CONF_OK;
 }
@@ -140,6 +145,12 @@ static ngx_command_t ngx_http_avatars_gen_commands[] = {
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_avatars_gen_loc_conf_t, show_contour),
+      NULL},
+    { ngx_string("avatars_gen_square"),
+      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_flag_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_avatars_gen_loc_conf_t, square),
       NULL},
 
     ngx_null_command
@@ -244,7 +255,7 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     draw_closure.curr_chain = NULL;
     draw_closure.total_length = 0;
     draw_closure.r = r;
-    generate_avatar(&draw_closure, &loc_conf->bg_color, &loc_conf->contour_color, &loc_conf->font_color, (char *)loc_conf->font_face.data, loc_conf->font_size, loc_conf->font_italic, loc_conf->font_bold, loc_conf->avatar_size, loc_conf->show_contour, (char *)initials);
+    generate_avatar(&draw_closure, &loc_conf->bg_color, &loc_conf->contour_color, &loc_conf->font_color, (char *)loc_conf->font_face.data, loc_conf->font_size, loc_conf->font_italic, loc_conf->font_bold, loc_conf->avatar_size, loc_conf->show_contour, loc_conf->square, (char *)initials);
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "TOTAL LENGTH %zu", draw_closure.total_length);
 
     r->headers_out.status = NGX_HTTP_OK;
