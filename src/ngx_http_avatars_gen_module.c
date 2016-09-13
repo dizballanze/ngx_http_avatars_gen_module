@@ -1,5 +1,4 @@
 #include "avatars_gen.h"
-#define INITIALS_MAX_SIZE 12
 
 
 /* Directives handlers declarations */
@@ -8,19 +7,6 @@ static char *ngx_http_avatars_gen_bg_color_found_cb(ngx_conf_t *cf, ngx_command_
 static char *ngx_http_avatars_gen_contour_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static char *ngx_http_avatars_gen_font_color_found_cb(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
-/* Configuration structure */
-typedef struct {
-    avatars_gen_rgb bg_color;
-    avatars_gen_rgb contour_color;
-    avatars_gen_rgb font_color;
-    ngx_uint_t avatar_size; // in pixels
-    ngx_str_t font_face;
-    ngx_uint_t font_size; // in pixels
-    ngx_flag_t font_italic;
-    ngx_flag_t font_bold;
-    ngx_flag_t show_contour;
-    ngx_flag_t square;
-} ngx_http_avatars_gen_loc_conf_t;
 
 /* Allocate memory for configuration */
 static void *ngx_http_avatars_gen_create_loc_conf(ngx_conf_t *cf) {
@@ -187,35 +173,6 @@ ngx_module_t ngx_http_avatars_gen_module = {
     NGX_MODULE_V1_PADDING
 };
 
-/* Fetch initials from URI and return result status */
-int get_initials_from_uri(ngx_str_t *uri, unsigned char *initials) {
-    unsigned char *curr_character = (uri->data + uri->len);
-    unsigned int characters_copied = 0;
-    while ((*curr_character != '/') && (characters_copied != INITIALS_MAX_SIZE) && (curr_character != uri->data)) {
-        initials[characters_copied] = *curr_character;
-        characters_copied++;
-        curr_character--;
-    }
-    if (*curr_character != '/') {
-        return 0;
-    }
-    /* Revert bytes */
-    unsigned char tmp;
-    unsigned int i;
-    for (i = 0; i < (characters_copied / 2); i++) {
-        tmp = initials[i];
-        initials[i] = initials[characters_copied - i - 1];
-        initials[characters_copied - i - 1] = tmp;
-    }
-    initials[characters_copied] = '\0';
-    /* Validate length */
-    size_t utf8_count = ngx_utf8_length(initials, characters_copied - 1);
-    if ((utf8_count > 2) || (utf8_count < 1)) {
-        return 0;
-    }
-    return 1;
-}
-
 
 /*
  * Main handler function of the module.
@@ -228,21 +185,17 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     avatars_gen_closure draw_closure;
     unsigned char initials[INITIALS_MAX_SIZE + 1] = "";
 
-    loc_conf = ngx_http_get_module_loc_conf(r, ngx_http_avatars_gen_module);
-    if (loc_conf->font_face.len)
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "font_face %s", loc_conf->font_face.data);
-
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "URI %s", r->uri.data);
-    // 1 symbol
-    if (get_initials_from_uri(&r->uri, initials)) {
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "INITIALS %s", initials);
-    } else {
-        return NGX_HTTP_BAD_REQUEST;
-    }
-
+    /* GET and HEAD methods only */
     if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD))) {
         return NGX_HTTP_NOT_ALLOWED;
     }
+
+    loc_conf = ngx_http_get_module_loc_conf(r, ngx_http_avatars_gen_module);
+
+    if (!get_initials_from_uri(&r->uri, initials)) {
+        return NGX_HTTP_BAD_REQUEST;
+    }
+
     rc = ngx_http_discard_request_body(r);
 
     if (rc != NGX_OK) {
@@ -255,8 +208,7 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     draw_closure.curr_chain = NULL;
     draw_closure.total_length = 0;
     draw_closure.r = r;
-    generate_avatar(&draw_closure, &loc_conf->bg_color, &loc_conf->contour_color, &loc_conf->font_color, (char *)loc_conf->font_face.data, loc_conf->font_size, loc_conf->font_italic, loc_conf->font_bold, loc_conf->avatar_size, loc_conf->show_contour, loc_conf->square, (char *)initials);
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "TOTAL LENGTH %zu", draw_closure.total_length);
+    generate_avatar(&draw_closure, loc_conf, (char *)initials);
 
     r->headers_out.status = NGX_HTTP_OK;
     r->headers_out.content_length_n = draw_closure.total_length;

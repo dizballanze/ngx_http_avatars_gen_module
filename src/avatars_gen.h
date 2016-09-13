@@ -10,12 +10,30 @@
 #include <math.h>
 
 
+#define INITIALS_MAX_SIZE 12
+
+
 typedef struct avatars_gen_rgb avatars_gen_rgb;
 struct avatars_gen_rgb {
     double red;
     double green;
     double blue;
 };
+
+
+/* Configuration structure */
+typedef struct {
+    avatars_gen_rgb bg_color;
+    avatars_gen_rgb contour_color;
+    avatars_gen_rgb font_color;
+    ngx_uint_t avatar_size; // in pixels
+    ngx_str_t font_face;
+    ngx_uint_t font_size; // in pixels
+    ngx_flag_t font_italic;
+    ngx_flag_t font_bold;
+    ngx_flag_t show_contour;
+    ngx_flag_t square;
+} ngx_http_avatars_gen_loc_conf_t;
 
 
 typedef struct avatars_gen_closure avatars_gen_closure;
@@ -27,9 +45,9 @@ struct avatars_gen_closure {
 };
 
 
-void generate_avatar(
-    avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color,
-    avatars_gen_rgb *font_color, char *font, unsigned int font_size, int font_italic, int font_bold,
-    unsigned int avatar_size, int show_contour, int square, char *text);
+void generate_avatar(avatars_gen_closure *closure, ngx_http_avatars_gen_loc_conf_t *conf, char *text);
+
+
+int get_initials_from_uri(ngx_str_t *uri, unsigned char *initials);
 
 #endif

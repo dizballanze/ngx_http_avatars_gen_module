@@ -48,45 +48,45 @@ cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int
 
 
 /* Draw avatar by provided options */
-void generate_avatar(avatars_gen_closure *closure, avatars_gen_rgb *background_color, avatars_gen_rgb *contour_color, avatars_gen_rgb *font_color, char *font, unsigned int font_size, int font_italic, int font_bold, unsigned int avatar_size, int show_contour, int square, char *text) {
-    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, avatar_size, avatar_size);
+void generate_avatar(avatars_gen_closure *closure, ngx_http_avatars_gen_loc_conf_t *conf, char *text) {
+    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, conf->avatar_size, conf->avatar_size);
     cairo_t *cr = cairo_create(surface);
     /* Draw circle and fill background */
     double contour_offset = 0;
-    if (show_contour) {
+    if (conf->show_contour) {
         contour_offset = 1.25;
     }
-    if (square) {
+    if (conf->square) {
         cairo_rectangle(cr, contour_offset, contour_offset,
-            avatar_size - 2 * contour_offset, avatar_size - 2 * contour_offset);
+            conf->avatar_size - 2 * contour_offset, conf->avatar_size - 2 * contour_offset);
     } else {
-        double radius = avatar_size / 2.0;
+        double radius = conf->avatar_size / 2.0;
         cairo_arc(cr, radius, radius, radius - contour_offset, 0, 2 * M_PI);
     }
-    cairo_set_source_rgb(cr, background_color->red, background_color->green, background_color->blue);
+    cairo_set_source_rgb(cr, conf->bg_color.red, conf->bg_color.green, conf->bg_color.blue);
     cairo_fill_preserve(cr);
-    if (show_contour) {
+    if (conf->show_contour) {
         cairo_set_line_width(cr, 2.5);
-        cairo_set_source_rgb(cr, contour_color->red, contour_color->green, contour_color->blue);
+        cairo_set_source_rgb(cr, conf->contour_color.red, conf->contour_color.green, conf->contour_color.blue);
         cairo_stroke(cr);
     }
     /* Draw text */
     cairo_text_extents_t extents;
     int font_slant = CAIRO_FONT_SLANT_NORMAL;
     int font_weight = CAIRO_FONT_WEIGHT_NORMAL;
-    if (font_italic) {
+    if (conf->font_italic) {
         font_slant = CAIRO_FONT_SLANT_ITALIC;
     }
-    if (font_bold) {
+    if (conf->font_bold) {
         font_weight = CAIRO_FONT_WEIGHT_BOLD;
     }
-    cairo_select_font_face(cr, font, font_slant, font_weight);
-    cairo_set_font_size(cr, font_size);
+    cairo_select_font_face(cr, (char *)conf->font_face.data, font_slant, font_weight);
+    cairo_set_font_size(cr, conf->font_size);
     cairo_text_extents(cr, text, &extents);
-    double x = (avatar_size / 2.0) - (extents.width/2 + extents.x_bearing);
-    double y = (avatar_size / 2.0) - (extents.height/2 + extents.y_bearing);
+    double x = (conf->avatar_size / 2.0) - (extents.width/2 + extents.x_bearing);
+    double y = (conf->avatar_size / 2.0) - (extents.height/2 + extents.y_bearing);
     cairo_move_to(cr, x, y);
-    cairo_set_source_rgb(cr, font_color->red, font_color->green, font_color->blue);
+    cairo_set_source_rgb(cr, conf->font_color.red, conf->font_color.green, conf->font_color.blue);
     cairo_show_text(cr, text);
     /* Save and destroy */
     cairo_destroy (cr);
