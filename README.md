@@ -56,6 +56,13 @@ Directives:
 - `avatars_gen_font_bold` (default: `off`) - bold font on/off
 - `avatars_gen_square` (default: `off`) - square avatars on/off
 
+You could change avatar colors with GET args (i.e. `?bg_color=FFFFFF&font_color=000000`):
+
+- `bg_color`
+- `contour_color`
+- `font_color`
+
+
 ## Usage
 
 You can make request to `http://localhost/avatar/GH` and it will generate 100x100 png image on-the-go:
@@ -73,7 +80,7 @@ __Module currently supports only 1 and 2 symbols initials.__
 - [x]  enable/disable border
 - [x]  rich font settings
 - [x]  square avatars
-- [ ]  colors configuration through GET parameters
+- [x]  colors configuration through GET parameters
 - [ ]  random colors mode
 - [ ]  different formats (jpg/svg)
 - [ ]  configurations merge
