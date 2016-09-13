@@ -45,9 +45,13 @@ struct avatars_gen_closure {
 };
 
 
-void generate_avatar(avatars_gen_closure *closure, ngx_http_avatars_gen_loc_conf_t *conf, char *text);
+void str_to_rgb(char *str, avatars_gen_rgb *color);
 
 
-int get_initials_from_uri(ngx_str_t *uri, unsigned char *initials);
+void ngx_http_avatars_gen_generate_avatar(avatars_gen_closure *closure, ngx_http_avatars_gen_loc_conf_t *conf, char *text);
+
+
+int ngx_http_avatars_gen_get_initials_from_uri(ngx_str_t *uri, unsigned char *initials);
+ngx_http_avatars_gen_loc_conf_t *ngx_http_avatars_gen_request_conf(ngx_http_request_t *r, ngx_http_avatars_gen_loc_conf_t *loc_conf);
 
 #endif

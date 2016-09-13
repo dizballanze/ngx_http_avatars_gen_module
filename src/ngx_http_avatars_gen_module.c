@@ -182,6 +182,7 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     ngx_int_t rc;
     ngx_chain_t out;
     ngx_http_avatars_gen_loc_conf_t *loc_conf;
+    ngx_http_avatars_gen_loc_conf_t *request_conf;
     avatars_gen_closure draw_closure;
     unsigned char initials[INITIALS_MAX_SIZE + 1] = "";
 
@@ -192,7 +193,7 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
 
     loc_conf = ngx_http_get_module_loc_conf(r, ngx_http_avatars_gen_module);
 
-    if (!get_initials_from_uri(&r->uri, initials)) {
+    if (!ngx_http_avatars_gen_get_initials_from_uri(&r->uri, initials)) {
         return NGX_HTTP_BAD_REQUEST;
     }
 
@@ -204,11 +205,17 @@ static ngx_int_t ngx_http_avatars_gen_handler(ngx_http_request_t *r) {
     r->headers_out.content_type_len = sizeof("image/png") - 1;
     r->headers_out.content_type.data = (u_char *) "image/png";
 
+    /* Prepare closure */
     draw_closure.first_chain = &out;
     draw_closure.curr_chain = NULL;
     draw_closure.total_length = 0;
     draw_closure.r = r;
-    generate_avatar(&draw_closure, loc_conf, (char *)initials);
+    /* Update local conf with request related */
+    request_conf = ngx_http_avatars_gen_request_conf(r, loc_conf);
+    if (request_conf == NULL) {
+        return NGX_HTTP_SERVICE_UNAVAILABLE;
+    }
+    ngx_http_avatars_gen_generate_avatar(&draw_closure, request_conf, (char *)initials);
 
     r->headers_out.status = NGX_HTTP_OK;
     r->headers_out.content_length_n = draw_closure.total_length;
@@ -239,8 +246,8 @@ int is_valid_color(ngx_str_t *color) {
 }
 
 /* Convert RRGGBB string to avatars_gen_rgb structure */
-void str_to_rgb(ngx_str_t *str, avatars_gen_rgb *color) {
-    long int number = strtol((char *)str->data, NULL, 16);
+void str_to_rgb(char *str, avatars_gen_rgb *color) {
+    long int number = strtol(str, NULL, 16);
     color->red = ((number >> 16) & 0xFF) / 255.0;
     color->green = ((number >> 8) & 0xFF) / 255.0;
     color->blue = (number & 0xFF) / 255.0;
@@ -256,7 +263,7 @@ static char *ngx_http_avatars_gen_bg_color_found_cb(ngx_conf_t *cf, ngx_command_
     ngx_conf_log_error(NGX_LOG_DEBUG, cf, 0, "avatars_gen_bg_color %s len %d", value[1].data, value[1].len);
     if (!is_valid_color(&value[1]))
         return NGX_CONF_ERROR;
-    str_to_rgb(&value[1], &loc_conf->bg_color);
+    str_to_rgb((char *)value[1].data, &loc_conf->bg_color);
     return NGX_CONF_OK;
 }
 
@@ -269,7 +276,7 @@ static char *ngx_http_avatars_gen_font_color_found_cb(ngx_conf_t *cf, ngx_comman
     ngx_conf_log_error(NGX_LOG_DEBUG, cf, 0, "avatars_gen_font_color %s len %d", value[1].data, value[1].len);
     if (!is_valid_color(&value[1]))
         return NGX_CONF_ERROR;
-    str_to_rgb(&value[1], &loc_conf->font_color);
+    str_to_rgb((char *)value[1].data, &loc_conf->font_color);
     return NGX_CONF_OK;
 }
 
@@ -282,6 +289,6 @@ static char *ngx_http_avatars_gen_contour_color_found_cb(ngx_conf_t *cf, ngx_com
     ngx_conf_log_error(NGX_LOG_DEBUG, cf, 0, "avatars_gen_contour_color %s len %d", value[1].data, value[1].len);
     if (!is_valid_color(&value[1]))
         return NGX_CONF_ERROR;
-    str_to_rgb(&value[1], &loc_conf->contour_color);
+    str_to_rgb((char *)value[1].data, &loc_conf->contour_color);
     return NGX_CONF_OK;
 }

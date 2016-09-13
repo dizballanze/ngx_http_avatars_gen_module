@@ -48,7 +48,7 @@ cairo_status_t write_func(void *closure, const unsigned char *data, unsigned int
 
 
 /* Draw avatar by provided options */
-void generate_avatar(avatars_gen_closure *closure, ngx_http_avatars_gen_loc_conf_t *conf, char *text) {
+void ngx_http_avatars_gen_generate_avatar(avatars_gen_closure *closure, ngx_http_avatars_gen_loc_conf_t *conf, char *text) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, conf->avatar_size, conf->avatar_size);
     cairo_t *cr = cairo_create(surface);
     /* Draw circle and fill background */
