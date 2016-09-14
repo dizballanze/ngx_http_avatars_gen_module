@@ -31,12 +31,46 @@ http {
         listen       80;
         server_name  localhost;
 
+        # Default params
         location /avatar {
             avatars_gen;
-            avatars_gen_bg_color 4285F4;
-            avatars_gen_contour_color 333333;
-            avatars_gen_font_color FFFFFF;
-            avatars_gen_font_face sans;
+        }
+
+        # Black & white avatar
+        location /bw-avatar {
+            avatars_gen;
+            avatars_gen_bg_color FFFFFF;
+            avatars_gen_contour_color 000000;
+            avatars_gen_font_color 000000;
+            avatars_gen_font_face serif;
+        }
+
+        # Custom size and without contour
+        location /big-contourless {
+            avatars_gen;
+            avatars_gen_size 400;
+            avatars_gen_show_contour off;
+        }
+
+        # Customized font
+        location /font {
+            avatars_gen;
+            avatars_gen_size 300;
+            avatars_gen_font_size 100;
+            avatars_gen_font_face "Liberation Sans Narrow";
+            avatars_gen_font_bold on;
+        }
+
+        # Square form
+        location /square {
+            avatars_gen;
+            avatars_gen_square on;
+            avatars_gen_bg_color 72A3F1;
+            avatars_gen_contour_color E9AD00;
+            avatars_gen_font_color 9BFAB5;
+            avatars_gen_size 100;
+            avatars_gen_font_face "Liberation Sans";
+            avatars_gen_show_contour off;
         }
     }
 }
@@ -67,7 +101,25 @@ You could change avatar colors with GET args (i.e. `?bg_color=FFFFFF&font_color=
 
 You can make request to `http://localhost/avatar/GH` and it will generate 100x100 png image on-the-go:
 
-![ava.png](ava.png)
+Default:
+
+![default](samples/default.png)
+
+Black & white:
+
+![black and white](samples/black-and-white.png)
+
+Custom size and without contour:
+
+![big-contourless](samples/big-contourless.png)
+
+Customized font:
+
+![customized font](samples/font.png)
+
+Square form:
+
+![square](samples/square.png)
 
 __Module currently supports only 1 and 2 symbols initials.__
 
@@ -91,21 +143,3 @@ __Module currently supports only 1 and 2 symbols initials.__
 The MIT License (MIT)
 
 Copyright (c) 2016 Yuri Shikanov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
