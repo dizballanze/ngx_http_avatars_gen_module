@@ -1,5 +1,7 @@
 # ngx_http_avatars_gen_module
 
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/dizballanze)
+
 Nginx module to generate gmail-like avatars based on user initials.
 
 ## Dependencies
